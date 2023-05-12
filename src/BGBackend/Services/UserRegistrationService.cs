@@ -45,15 +45,17 @@ namespace BrowserGameBackend.Services
                     if (!UserInputTools.ValidEmail(user.Email!)) return "Invalid email";
                 }
                 //"Exists" check
+
                 if (await _authenticationService.UsernameExists(user.Name!)) return "Username taken";
                 if (await _authenticationService.EmailExists(user.Email!)) return "Email taken";
 
                 //send confirmation email
                 string emailResult = await SendConfirmationEmail(user);
-                if (emailResult!= "Ok") return emailResult;
+                if (emailResult != "Ok") return emailResult;
 
                 //hash password, create user
                 user.Password = PasswordTools.Hash(user.Password!);
+                user.LastLogin = DateTime.UtcNow;
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
                 return "Ok";

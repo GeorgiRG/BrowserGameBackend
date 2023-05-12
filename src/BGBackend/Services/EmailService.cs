@@ -38,7 +38,6 @@ namespace BrowserGameBackend.Services
 
         public async Task<string> Send(string receiver, string subject, string body)
         {
-
             // create
             MimeMessage email = new();
             email.From.Add(MailboxAddress.Parse(emailOptions.Sender));
@@ -47,10 +46,14 @@ namespace BrowserGameBackend.Services
             email.Body = new TextPart(TextFormat.Plain) { Text = body };
 
             // client
-            using SmtpClient smtpClient = new ();            
+            using SmtpClient smtpClient = new ();
+            // authenticate
+            
             try
             {
+
                 await smtpClient.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTlsWhenAvailable);
+
             }
             catch (SmtpCommandException ex)
             {
@@ -63,13 +66,12 @@ namespace BrowserGameBackend.Services
                 Console.WriteLine("Protocol error while trying to connect: {0}", ex.Message);
                 return "Server error";
             }
-
-            // authenticate
             if (smtpClient.Capabilities.HasFlag(SmtpCapabilities.Authentication))
             {
                 try
                 {
                     await smtpClient.AuthenticateAsync(emailOptions.Sender, emailOptions.SenderPass);
+
                 }
                 catch (AuthenticationException ex)
                 {
@@ -88,6 +90,7 @@ namespace BrowserGameBackend.Services
                     return "Server error";
                 }
             }
+
             //send
             try
             {

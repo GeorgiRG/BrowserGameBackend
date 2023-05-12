@@ -33,7 +33,7 @@ namespace BrowserGameBackend.Controllers.API
         public async Task<ActionResult> Testmail()
         {
             Console.WriteLine("Woorks");
-            _emailService.Send("grgeorgi93@gmail.com", "Hello", "This is a test email again!");
+            await _emailService.Send("grgeorgi93@gmail.com", "Hello", "This is a test email again!");
             return Ok();
         }
 

@@ -35,7 +35,7 @@ namespace BrowserGameBackend.Tools
             else { return true; }
         }
 
-        [GeneratedRegex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$")]
+        [GeneratedRegex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,64}$")]
         private static partial Regex PasswordRegex();
         public static bool ValidPassword(string password) 
         {

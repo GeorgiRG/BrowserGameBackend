@@ -10,9 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<GameContext>(options  =>
                             options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionLocal")));
-
+builder.Services.AddMemoryCache(options =>
+                                {
+                                    
+                                    options.SizeLimit = 1000;
+                                    options.CompactionPercentage = 0.1;
+                                    options.TrackStatistics= true;
+                                });
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 
@@ -22,7 +29,8 @@ builder.Services.AddCors(options => {options.AddPolicy(name: "CorsPolicy",
                     {
                         policy.WithOrigins("http://localhost:4200")
                                     .AllowAnyHeader()
-                                    .AllowAnyMethod();
+                                    .AllowAnyMethod() 
+                                    .AllowCredentials();
                     });
 });
 //QUARTZ
