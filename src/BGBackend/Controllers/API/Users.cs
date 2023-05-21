@@ -4,6 +4,7 @@ using BrowserGameBackend.Services;
 using System.ComponentModel.DataAnnotations;
 using BrowserGameBackend.Types;
 using System.Security.Cryptography;
+using BrowserGameBackend.Dto;
 
 namespace BrowserGameBackend.Controllers.API
 {
@@ -12,14 +13,14 @@ namespace BrowserGameBackend.Controllers.API
     public class UsersController : ControllerBase
     {
         private readonly Services.IAuthenticationService _authenticationService;
-        private readonly IUserRegistrationService _userRegistration;
-        private readonly ISessionService _sessionService;
+        private readonly IUserRegistrationService _userRegistrationService;
+        private readonly IUserManagementService _userManagementService;
 
-        public UsersController(IUserRegistrationService userRegistration, Services.IAuthenticationService authenticationService, ISessionService sessionService)
+        public UsersController(IUserRegistrationService userRegistrationService, Services.IAuthenticationService authenticationService, IUserManagementService userManagementService)
         {
-            _userRegistration = userRegistration;
+            _userRegistrationService = userRegistrationService;
             _authenticationService = authenticationService;
-            _sessionService = sessionService;
+            _userManagementService = userManagementService;
         }
         [HttpGet]
         public async Task<IActionResult> Get(string? sessionId, string? email)
@@ -38,8 +39,6 @@ namespace BrowserGameBackend.Controllers.API
                     Secure = true
                 };
                 Response.Cookies.Append("sessionId", $"{smth}", cookieOptions);
-
-
 
                 return Ok();
 
@@ -60,12 +59,12 @@ namespace BrowserGameBackend.Controllers.API
 
             if (username != null)
             {
-                result = await _authenticationService.UsernameExists(username);
+                result = await _authenticationService.UsernameValidAndOriginal(username);
                 return Ok(result);
             }
             else if (email != null)
             {
-                result = await _authenticationService.EmailExists(email);
+                result = await _authenticationService.EmailValidAndOriginal(email);
                 return Ok(result);
             }
             else 
@@ -73,13 +72,14 @@ namespace BrowserGameBackend.Controllers.API
                 return BadRequest(Response.Headers); 
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> Register([FromBody, Required] User user)
         {
             GeneralResponse response = new ();
             Console.WriteLine("{0}, {1}, {2}", user.Name, user.Email, user.Password);
             Console.WriteLine("\ndoing stuff\n");
-            string result = await _userRegistration.CreateUser(user);
+            string result = await _userRegistrationService.CreateUser(user);
             if (result != "Ok") 
             {
                 response.Message = "There were errors in user creation";
@@ -97,7 +97,7 @@ namespace BrowserGameBackend.Controllers.API
         {
             Console.WriteLine("works");
             GeneralResponse response = new ();
-            string result = await _userRegistration.ConfirmEmail(confirmationCode);
+            string result = await _userRegistrationService.ConfirmEmail(confirmationCode);
             if (result == null || result != "Ok")
             {
                 response.Message = "There were errors in email confirmation";
@@ -106,6 +106,34 @@ namespace BrowserGameBackend.Controllers.API
             }
             response.Message = "Email confirmed";
             return Ok(response);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateCharacter(string? email = null, string? faction = null, string? species = null, string? password = null)
+        {
+            string? sessionId = Request.Cookies["sessionId"];
+            UserDto? userDto = await _userManagementService.UpdateUser(sessionId!, email, faction, species, password)!;
+            if (userDto == null) return BadRequest("Invalid session or input");
+            return Ok(userDto);
+        }
+        
+        [Route("levelUp")]
+        [HttpPut]
+        public async Task<IActionResult> LevelUp([Required, FromBody] UserSkills userSkills)
+        {
+            string? sessionId = Request.Cookies["sessionId"];
+            UserDto? userDto = await _userManagementService.GetUserDto(sessionId: sessionId)!;
+            if (userDto == null) return Unauthorized("Session expired");
+            UserSkills? updatedUserSkills = await _userManagementService.UpdateUserSkills(userDto, userSkills)!;
+            if (updatedUserSkills == null) return BadRequest("Invalid input");
+            return Ok(updatedUserSkills);
+        }
+
+        [Route("{id}/colony")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateToColony()
+        {
+            return Ok();
         }
 
         [HttpDelete]

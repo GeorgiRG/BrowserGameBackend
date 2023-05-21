@@ -9,8 +9,8 @@ namespace BrowserGameBackend.Services
 
     public interface IAuthenticationService
     {
-        public Task<bool> UsernameExists(string username);
-        public Task<bool> EmailExists(string email);
+        public Task<bool> UsernameValidAndOriginal(string username);
+        public Task<bool> EmailValidAndOriginal(string email);
         public Task<string> Login(string email, string password);
 
     }
@@ -25,16 +25,16 @@ namespace BrowserGameBackend.Services
             _context = context;
         }
 
-        public async Task<bool> UsernameExists(string username)
+        public async Task<bool> UsernameValidAndOriginal(string username)
         {
-            if (!UserInputTools.ValidUsername(username)) return false;
-            return await _context.Users.Where(usr => usr.Name == username).AnyAsync();
+            return UserInputTools.ValidUsername(username) &&
+                    !await _context.Users.Where(usr => usr.Name == username).AnyAsync();
         }
 
-        public async Task<bool> EmailExists(string email)
+        public async Task<bool> EmailValidAndOriginal(string email)
         {
-            if (!UserInputTools.ValidUsername(email)) return false;
-            return await _context.Users.Where(usr => usr.Email == email).AnyAsync();
+            return UserInputTools.ValidEmail(email) &&
+                    !await _context.Users.Where(usr => usr.Email == email).AnyAsync();
         }
 
         public async Task<string> Login(string email, string password)

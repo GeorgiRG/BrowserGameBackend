@@ -9,8 +9,9 @@ namespace BrowserGameBackend.Data
     public class GameContext : DbContext
     {
         private readonly IConfiguration _config;
-        public DbSet<Base> Bases { get; set; } = default!;
+        public DbSet<Colony> Colonies { get; set; } = default!;
         public DbSet<User> Users { get; set; } = default!;
+        public DbSet<UserSkills> UserSkills { get; set; }
 
         public GameContext (IConfiguration config) 
         {

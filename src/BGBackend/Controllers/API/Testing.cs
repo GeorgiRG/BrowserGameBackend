@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BrowserGameBackend.Tools;
 using BrowserGameBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BrowserGameBackend.Controllers.API
 {
@@ -16,6 +17,7 @@ namespace BrowserGameBackend.Controllers.API
             _emailService= emailService;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult> Test()
         {

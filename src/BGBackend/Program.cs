@@ -8,7 +8,7 @@ using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<GameContext>(options  =>
+builder.Services.AddDbContext<GameContext>(options =>
                             options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionLocal")));
 builder.Services.AddMemoryCache(options =>
                                 {
@@ -19,7 +19,7 @@ builder.Services.AddMemoryCache(options =>
                                 });
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
-builder.Services.AddScoped<ISessionService, SessionService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 
@@ -66,10 +66,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(); 
 
 app.UseRouting();
-
 app.UseCors("CorsPolicy");
-
-app.UseAuthorization();
 
 app.MapControllers();
 

@@ -3,6 +3,7 @@ using BrowserGameBackend.Data;
 using BrowserGameBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using BrowserGameBackend.Tools;
+using BrowserGameBackend.Tools.GameTools;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -46,8 +47,8 @@ namespace BrowserGameBackend.Services
                 }
                 //"Exists" check
 
-                if (await _authenticationService.UsernameExists(user.Name!)) return "Username taken";
-                if (await _authenticationService.EmailExists(user.Email!)) return "Email taken";
+                if (await _authenticationService.UsernameValidAndOriginal(user.Name!)) return "Username taken";
+                if (await _authenticationService.EmailValidAndOriginal(user.Email!)) return "Email taken";
 
                 //send confirmation email
                 string emailResult = await SendConfirmationEmail(user);
@@ -56,7 +57,15 @@ namespace BrowserGameBackend.Services
                 //hash password, create user
                 user.Password = PasswordTools.Hash(user.Password!);
                 user.LastLogin = DateTime.UtcNow;
+                UserSkills userSkills = new()
+                {
+                    User = user,
+                };
+                user.UserSkills = userSkills;
+                user.UserSkillsId = userSkills.Id;
                 _context.Users.Add(user);
+                _context.UserSkills.Add(userSkills);
+
                 await _context.SaveChangesAsync();
                 return "Ok";
             }
