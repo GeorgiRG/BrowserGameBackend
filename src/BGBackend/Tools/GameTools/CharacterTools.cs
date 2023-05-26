@@ -22,7 +22,6 @@ namespace BrowserGameBackend.Tools.GameTools
             else return null;
         }
 
-
         public static bool ValidSkills(UserSkills oldUserSkills, UserSkills userSkills)
         {
             int spaceWarfare = userSkills.SpaceWarfare - oldUserSkills.SpaceWarfare;

@@ -3,6 +3,7 @@ using BrowserGameBackend.Models;
 using Quartz.Util;
 using System.Diagnostics.Eventing.Reader;
 using System.Net;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
 
 namespace BrowserGameBackend.Tools
@@ -18,8 +19,8 @@ namespace BrowserGameBackend.Tools
             }
             return false;
         }
-
-        [GeneratedRegex(@"[A-Za-z-_']{3,25}")]
+        //Username has to be 3-25 charecters long, start with letters and not have special symbols(except _ or -)
+        [GeneratedRegex(@"^[^<>[\]{\}|\\\/^~')(`=@!¤€.%# :;,$%?\0-\cZ](?=.{1}[A-Za-z])[\dA-Za-z_-]{1,25}$")]
         private static partial Regex UsernameRegex();
         public static bool ValidUsername(string username)
         {
@@ -34,8 +35,8 @@ namespace BrowserGameBackend.Tools
             }
             else { return true; }
         }
-
-        [GeneratedRegex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,64}$")]
+        //Password must be between 8-64 characters long, have at least one number, one uppercase and one lowercase letter!
+        [GeneratedRegex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,64}$")]
         private static partial Regex PasswordRegex();
         public static bool ValidPassword(string password) 
         {
