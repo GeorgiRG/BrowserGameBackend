@@ -98,7 +98,7 @@ namespace BrowserGameBackend.Services
             //update user
             try
             {
-                User user = await _context.Users.FirstAsync(usr => usr.EmailConfirmation == confirmCode);
+                User? user = await _context.Users.FirstOrDefaultAsync(usr => usr.EmailConfirmation == confirmCode);
                 if (user == null) return "Wrong code"; 
                 user.EmailConfirmation = "Ok";
                 await _context.SaveChangesAsync();

@@ -112,6 +112,7 @@ namespace BrowserGameBackend.Controllers.API
         public async Task<IActionResult> UpdateCharacter(string? email = null, string? faction = null, string? species = null, string? password = null)
         {
             string? sessionId = Request.Cookies["sessionId"];
+            Console.WriteLine(sessionId);
             UserDto? userDto = await _userManagementService.UpdateUser(sessionId!, email, faction, species, password)!;
             if (userDto == null) return BadRequest("Invalid session or input");
             return Ok(userDto);

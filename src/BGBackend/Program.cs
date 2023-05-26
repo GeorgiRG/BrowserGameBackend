@@ -9,7 +9,7 @@ using Quartz;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<GameContext>(options =>
-                            options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionLocal")));
+                            options.UseNpgsql(builder.Configuration.GetConnectionString("DbProd")));
 builder.Services.AddMemoryCache(options =>
                                 {
                                     

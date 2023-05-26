@@ -18,7 +18,7 @@ namespace BrowserGameBackend.Data
             _config = config;
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseNpgsql(_config["ConnectionStrings:DbConnectionLocal"]);
+            => options.UseNpgsql(_config["ConnectionStrings:DbProd"]);
 
 
     }

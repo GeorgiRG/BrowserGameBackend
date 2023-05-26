@@ -47,7 +47,7 @@ namespace BrowserGameBackend.Controllers.API
             else
             {
                 Response.Cookies.Delete("sessionId");
-                return BadRequest("Expired session");
+                return Unauthorized("Expired session");
             }
         }
 

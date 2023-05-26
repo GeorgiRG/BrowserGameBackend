@@ -77,7 +77,7 @@ namespace BrowserGameBackend.Services
                                                     usr.Species!,
                                                     usr.UserSkillsId,
                                                     usr.SessionId!))
-                                .FirstAsync();
+                                .FirstOrDefaultAsync();
             return userDto!;
         }
 
@@ -140,7 +140,7 @@ namespace BrowserGameBackend.Services
         {
             UserSkills? userSkills = await _context.UserSkills
                                                 .Where(userSkills => userSkills.Id == userDto.UserSkillsId)
-                                                .FirstAsync();
+                                                .FirstOrDefaultAsync();
             return userSkills;
         }
         public async Task<UserSkills>? UpdateUserSkills(UserDto userDto, UserSkills userSkills)
@@ -149,6 +149,7 @@ namespace BrowserGameBackend.Services
             if (oldUserSkills == null) return null!;
             oldUserSkills = CharacterTools.LevelUp(oldUserSkills, userSkills)!;
             if (oldUserSkills == null) return null!;
+
             await _context.SaveChangesAsync();
             return oldUserSkills;
              

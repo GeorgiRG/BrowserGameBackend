@@ -48,8 +48,8 @@ namespace BrowserGameBackend.Tools
         private static partial Regex EmailRegex();
         public static bool ValidEmail (string email)
         {
-            string[] emailParts = email.Split('@');
             if (email == null) return false;
+            string[] emailParts = email.Split('@');
             return (EmailRegex().IsMatch(email) 
                 && email.Length < 320
                 && emailParts[0].Length < 63

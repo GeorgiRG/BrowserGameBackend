@@ -25,18 +25,17 @@ namespace BrowserGameBackend.Tools.GameTools
 
         public static bool ValidSkills(UserSkills oldUserSkills, UserSkills userSkills)
         {
-            int spaceWarfare = oldUserSkills.SpaceWarfare - userSkills.SpaceWarfare;
-            int landWarfare = oldUserSkills.LandWarfare - userSkills.LandWarfare;
-            int research = oldUserSkills.Research - userSkills.Research;
-            int engineering = oldUserSkills.Engineering - userSkills.Engineering;
-            int economy = oldUserSkills.Economy - userSkills.Economy;
+            int spaceWarfare = userSkills.SpaceWarfare - oldUserSkills.SpaceWarfare;
+            int landWarfare = userSkills.LandWarfare - oldUserSkills.LandWarfare;
+            int research = userSkills.Research - oldUserSkills.Research;
+            int engineering = userSkills.Engineering - oldUserSkills.Engineering;
+            int economy = userSkills.Economy - oldUserSkills.Economy;
 
-            bool validRange = (0 >= spaceWarfare && spaceWarfare <= SkillPoints)
-                            && (0 >= landWarfare && landWarfare <= SkillPoints)
-                            && (0 >= research && research <= SkillPoints)
-                            && (0 >= engineering && engineering <= SkillPoints)
-                            && (0 >= economy && economy <= SkillPoints);
-            
+            bool validRange = (0 <= spaceWarfare && spaceWarfare <= SkillPoints)
+                            && (0 <= landWarfare && landWarfare <= SkillPoints)
+                            && (0 <= research && research <= SkillPoints)
+                            && (0 <= engineering && engineering <= SkillPoints)
+                            && (0 <= economy && economy <= SkillPoints);
             return validRange && (spaceWarfare + landWarfare + research + engineering + economy == SkillPoints);
         }
         

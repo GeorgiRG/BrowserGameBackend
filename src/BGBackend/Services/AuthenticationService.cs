@@ -43,7 +43,7 @@ namespace BrowserGameBackend.Services
             {
                 return "Invalid input";
             }
-            string? userPass = await _context.Users.Where(user => user.Email == email).Select(user => user.Password).FirstAsync();
+            string? userPass = await _context.Users.Where(user => user.Email == email).Select(user => user.Password).FirstOrDefaultAsync();
             if (userPass != null)
             {
                 if (PasswordTools.Verify(password, userPass))
