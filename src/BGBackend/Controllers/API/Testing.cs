@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using BrowserGameBackend.Tools;
 using BrowserGameBackend.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Globalization;
 
 namespace BrowserGameBackend.Controllers.API
 {
@@ -11,24 +12,35 @@ namespace BrowserGameBackend.Controllers.API
     public class Testing : ControllerBase
     {
         private readonly IEmailService _emailService;
+        private readonly IGalaxyMapService _galaxyMapService;
 
-        public Testing(IEmailService emailService) 
+        public Testing(IEmailService emailService, IGalaxyMapService galaxyMapService) 
         {
             _emailService= emailService;
+            _galaxyMapService = galaxyMapService;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult> Test()
         {
-            Console.WriteLine("Working");
-            string input = "abcd";
-            
-            string result = PasswordTools.Hash(input);
-            Console.WriteLine(result, PasswordTools.Verify(input, result));
-            Console.WriteLine(PasswordTools.Verify(input, result));
+            await _galaxyMapService.GenerateGalaxy();
+            await _galaxyMapService.GeneratePlanets();
+            await _galaxyMapService.GenerateBots();
+            if (await _galaxyMapService.SettleFaction("Solar Empire"))
+            {
+                if (await _galaxyMapService.SettleFaction("Vega Legion"))
+                {
+                    if (await _galaxyMapService.SettleFaction("Azure Nebula"))
+                    {
+                        return Ok();
+                    }
+                    return BadRequest("azure failed");
 
-            return Ok();
+                }
+                return BadRequest("vega failed");
+
+            };
+            return BadRequest("solar failed");
         }
 
         [HttpGet("email")]

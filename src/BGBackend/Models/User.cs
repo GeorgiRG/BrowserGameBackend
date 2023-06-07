@@ -16,7 +16,6 @@ namespace BrowserGameBackend.Models
         public string EmailConfirmation { get; set; } = "No";
         public string SessionId { get; set; } = "1";
         public DateTime? LastLogin { get; set; }
-        public ICollection<Colony> Colonies { get; set; } = new List<Colony>();
         public int UserSkillsId { get; set; }
         public UserSkills? UserSkills { get; set;  }
 

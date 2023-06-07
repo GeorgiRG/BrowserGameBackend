@@ -9,7 +9,7 @@ using Quartz;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<GameContext>(options =>
-                            options.UseNpgsql(builder.Configuration.GetConnectionString("DbProd")));
+                            options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionLocal")));
 builder.Services.AddMemoryCache(options =>
                                 {
                                     
@@ -21,6 +21,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IGalaxyMapService, GalaxyMapService>();
 
 
 
