@@ -31,7 +31,6 @@ namespace BrowserGameBackend.Controllers.API
         {
             //if user picked remember me
             string? sessionId = Request.Cookies["sessionId"];
-            Console.WriteLine(sessionId);
 
             if (sessionId != null && sessionId.Length < 15)
             {

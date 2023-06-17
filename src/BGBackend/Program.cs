@@ -7,7 +7,8 @@ using Quartz;
 
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllersWithViews();
+//options add PascalCase instead on camelCase on responses / removed for now
+builder.Services.AddControllersWithViews(); //.AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
 builder.Services.AddDbContext<GameContext>(options =>
                             options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionLocal")));
 builder.Services.AddMemoryCache(options =>

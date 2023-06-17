@@ -7,7 +7,7 @@
     ///<br> PowerLevel - controls what "fleet and army" has the AI stockpiled, influenced by economy and age</br>
     ///<br> AvailableResources - res from available planets</br>
     ///<br> FleetTemplate - decided fleet by template and power level instead of doing anything too complex</br>
-    ///<br> PlanetsAmout - Planets that the bot can have </br>
+    ///<br> PlanetsAmout - P    lanets that the bot can have </br>
     ///<br> AttackCooldown - days between attacks</br>
     ///<br> PlayerIdPriorityTop - who will be the target to be attacked</br>
     ///<br> Age - age in days , years in game</br>

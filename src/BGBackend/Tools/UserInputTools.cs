@@ -40,7 +40,7 @@ namespace BrowserGameBackend.Tools
         private static partial Regex PasswordRegex();
         public static bool ValidPassword(string password) 
         {
-            if (password == null) return false;
+            if (password == null)  return false;
 
             return PasswordRegex().IsMatch(password);
         }

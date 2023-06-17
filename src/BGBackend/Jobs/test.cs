@@ -21,7 +21,6 @@ namespace BrowserGameBackend.Jobs
             {
                 continue;
             }
-            Console.WriteLine("task1");
             return Task.CompletedTask;
             /*
             _db.Add(new User

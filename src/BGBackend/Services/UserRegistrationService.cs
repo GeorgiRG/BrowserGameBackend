@@ -42,13 +42,12 @@ namespace BrowserGameBackend.Services
                 else
                 {
                     if (!UserInputTools.ValidUsername(user.Name!)) return "Invalid username";
-                    if (!UserInputTools.ValidPassword(user.Password!)) return "Invalid password";
                     if (!UserInputTools.ValidEmail(user.Email!)) return "Invalid email";
+                    if (!UserInputTools.ValidPassword(user.Password!)) return "Invalid password";
                 }
-                //"Exists" check
-
-                if (await _authenticationService.UsernameValidAndOriginal(user.Name!)) return "Username taken";
-                if (await _authenticationService.EmailValidAndOriginal(user.Email!)) return "Email taken";
+                //"Exists" check, username and email are checked beforehand to save a trip to db on bad input
+                if (!await _authenticationService.UsernameValidAndOriginal(user.Name!)) return "Username taken";
+                if (!await _authenticationService.EmailValidAndOriginal(user.Email!)) return "Email taken";
 
                 //send confirmation email
                 string emailResult = await SendConfirmationEmail(user);

@@ -11,6 +11,7 @@ namespace BrowserGameBackend.Services
 {
     public interface IGalaxyMapService
     {
+        public Task<StarSystem[]> GetStarSystems();
         public Task<bool> GenerateGalaxy();
         public Task<bool> GeneratePlanets();
         public Task<bool> GenerateBots();
@@ -26,6 +27,11 @@ namespace BrowserGameBackend.Services
         public GalaxyMapService(GameContext context)
         {
             _context = context;
+        }
+        public async Task<StarSystem[]> GetStarSystems()
+        {
+            StarSystem[] starSystems = await _context.StarSystems.ToArrayAsync();
+            return starSystems;
         }
 
         public async Task<bool> GenerateGalaxy()
@@ -94,80 +100,85 @@ namespace BrowserGameBackend.Services
         //all in one function as it actually makes it simpler
         public async Task<bool> SettleBots(int capitalX, int capitalY, string faction)
         {
-            int radius = 1;
-            Bot[] bots = await _context.Bots
-                                        .Where(bot => bot.Faction == faction && bot.PlanetsAmount > 0)
-                                        .ToArrayAsync();
-            //find all planets to settle
-            int planetsLeftToSettle = 0;
-            for(int i = 0; i < bots.Length; i++)
-            {
-                planetsLeftToSettle += bots[i].PlanetsAmount;
-            }
-            int currentBotPos = 0;
-            while (planetsLeftToSettle > 0)
-            {
-                //8 locations, can be null, second array is [X, Y]
-                int[][] locations = GalaxyMovementTool.GetStarSystemsInRadius(capitalX, capitalY, radius);
-                for(int i = 0; i < locations.Length; i++)
+            using var transaction = _context.Database.BeginTransaction();
+            try {
+                int radius = 1;
+                Bot[] bots = await _context.Bots
+                                            .Where(bot => bot.Faction == faction && bot.PlanetsAmount > 0)
+                                            .ToArrayAsync();
+                //find all planets to settle
+                int planetsLeftToSettle = 0;
+                for(int i = 0; i < bots.Length; i++)
                 {
-                    if(planetsLeftToSettle == 0)
+                    planetsLeftToSettle += bots[i].PlanetsAmount;
+                }
+                int currentBotPos = 0;
+                while (planetsLeftToSettle > 0)
+                {
+                    //8 locations, can be null, second array is [X, Y]
+                    int[][] locations = GalaxyMovementTool.GetStarSystemsInRadius(capitalX, capitalY, radius);
+                    for(int i = 0; i < locations.Length; i++)
                     {
-                        break;
-                    }
-
-                    if (locations[i] != null)
-                    {
-                        StarSystem? star = await _context.StarSystems
-                                                .Where(star => star.LocationX == locations[i][0] && star.LocationY == locations[i][1])
-                                                .FirstAsync();
-                        star.Faction = faction; //make sure beforehand the amount of bots is such that they don't leak in factions' systems
-                        //to avoid getting stuck in the loop below
-                        int reducePlanets = 0;
-                        if (star.Size - radius > planetsLeftToSettle)
+                        if(planetsLeftToSettle == 0)
                         {
-                            reducePlanets = star.Size - radius - planetsLeftToSettle;
+                            break;
                         }
 
-                        Planet[] planets = await _context.Planets
-                                                    .Where(planet => planet.SystemId == star.Id && planet.OwnerId == 0)
-                                                    .ToArrayAsync();
-                        for(int j = 0; j < planets.Length - radius - reducePlanets; j++)
+                        if (locations[i] != null)
                         {
-                            int botCount = 0;
-                            while (bots[currentBotPos].PlanetsAmount == 0 && botCount < bots.Length)
+                            StarSystem? star = await _context.StarSystems
+                                                    .Where(star => star.LocationX == locations[i][0]
+                                                           && star.LocationY == locations[i][1])
+                                                    .FirstAsync();
+                            star.Faction = faction; //make sure beforehand the amount of bots is such that they don't leak in factions' systems
+                            //to avoid getting stuck in the loop below
+                            int reducePlanets = 0;
+                            if (star.Size - radius > planetsLeftToSettle)
                             {
-                                currentBotPos++;
-                                botCount++; //break if it loops over all bots
+                                reducePlanets = star.Size - radius - planetsLeftToSettle;
+                            }
 
-                                if(currentBotPos >= bots.Length)
+                            Planet[] planets = await _context.Planets
+                                                        .Where(planet => planet.SystemId == star.Id && planet.OwnerId == 0)
+                                                        .ToArrayAsync();
+                            for(int j = 0; j < planets.Length - radius - reducePlanets; j++)
+                            {
+                                int botCount = 0;
+                                while (bots[currentBotPos].PlanetsAmount == 0 && botCount < bots.Length)
+                                {
+                                    currentBotPos++;
+                                    botCount++; //break if it loops over all bots
+
+                                    if(currentBotPos >= bots.Length)
+                                    {
+                                        currentBotPos = 0;
+                                    }
+                                }
+
+                                planets[j].OwnerId = bots[currentBotPos].Id;
+                                bots[currentBotPos].AvailableResources = 
+                                                        planets[j].RareMetals + planets[j].Metals
+                                                        + planets[j].Fuels + planets[j].Organics;
+                                bots[currentBotPos].PlanetsAmount--;
+                                planetsLeftToSettle--;
+                                currentBotPos++;
+                                if (currentBotPos >= bots.Length)
                                 {
                                     currentBotPos = 0;
                                 }
                             }
-
-                            planets[j].OwnerId = bots[currentBotPos].Id;
-                            bots[currentBotPos].AvailableResources = 
-                                                    planets[j].RareMetals + planets[j].Metals
-                                                    + planets[j].Fuels + planets[j].Organics;
-                            bots[currentBotPos].PlanetsAmount--;
-                            planetsLeftToSettle--;
-                            currentBotPos++;
-                            if (currentBotPos >= bots.Length)
-                            {
-                                currentBotPos = 0;
-                            }
                         }
-                        Console.WriteLine(planetsLeftToSettle);
                     }
+                    radius++;
+
                 }
-                radius++;
 
+                return await _context.SaveChangesAsync() > 0;
             }
-            Console.WriteLine(planetsLeftToSettle);
-
-            return await _context.SaveChangesAsync() > 0;
-
+            catch (Exception) { 
+                transaction.Rollback();
+                return false;
+            }
         }
     }
 }

@@ -39,7 +39,7 @@ namespace BrowserGameBackend.Services
 
         public async Task<string> Login(string email, string password)
         {
-            if (!UserInputTools.ValidUsername(email) || !UserInputTools.ValidPassword(password))
+            if (!UserInputTools.ValidEmail(email) || !UserInputTools.ValidPassword(password))
             {
                 return "Invalid input";
             }

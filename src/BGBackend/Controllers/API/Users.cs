@@ -78,7 +78,6 @@ namespace BrowserGameBackend.Controllers.API
         {
             GeneralResponse response = new ();
             Console.WriteLine("{0}, {1}, {2}", user.Name, user.Email, user.Password);
-            Console.WriteLine("\ndoing stuff\n");
             string result = await _userRegistrationService.CreateUser(user);
             if (result != "Ok") 
             {
@@ -95,7 +94,6 @@ namespace BrowserGameBackend.Controllers.API
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail([Required] string confirmationCode)
         {
-            Console.WriteLine("works");
             GeneralResponse response = new ();
             string result = await _userRegistrationService.ConfirmEmail(confirmationCode);
             if (result == null || result != "Ok")
@@ -112,7 +110,6 @@ namespace BrowserGameBackend.Controllers.API
         public async Task<IActionResult> UpdateCharacter(string? email = null, string? faction = null, string? species = null, string? password = null)
         {
             string? sessionId = Request.Cookies["sessionId"];
-            Console.WriteLine(sessionId);
             UserDto? userDto = await _userManagementService.UpdateUser(sessionId!, email, faction, species, password)!;
             if (userDto == null) return BadRequest("Invalid session or input");
             return Ok(userDto);
