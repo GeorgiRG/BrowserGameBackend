@@ -3,8 +3,6 @@
 	public class Planet
 	{
 		public int Id { get; set; }
-		public int SystemId { get; set; }
-
 		public string? Name { get; set; }
 		public int Size { get; set; }
 		public string? Type { get; set; } //Dwarf, Moon, Terrestrial, Giga Terrestrial
@@ -16,6 +14,8 @@
 		public int Population { get; set; } = 0;
 		public int Shielding { get; set; } = 0;
 		public int OwnerId { get; set; } = 0;
+        public int StarSystemId { get; set; }
+		public StarSystem StarSystem { get; set; } = null!;
 
-	}
+    }
 }

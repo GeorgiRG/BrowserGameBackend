@@ -9,8 +9,10 @@ namespace BrowserGameBackend.Models
         public string? Name { get; set; }
         public int LocationX { get; set; }
         public int LocationY { get; set; }
+        public int Sector { get; set; }
         public int Size { get; set; }
         public int TotalResources { get; set; }
         public string Faction { get; set; } = string.Empty;
+        public ICollection<Planet> Planets { get; } = new List<Planet>();
     }
 }

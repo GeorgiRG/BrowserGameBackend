@@ -8,8 +8,10 @@ namespace BrowserGameBackend.Tools.GameTools
 {
     public static class GeneratorTool
     {
-        public const int galaxySize = 100;
-        public const int galaxyWidth = 10;
+        //gSize must be square of gWidth for capital X,Y to work
+        public const int galaxySize = 10000;
+        public const int sectorSize = 100; //systems per sector
+        public const int galaxyWidth = 100; //affects max X and Y
         public const int CapitalSystemSize = 11;
         public static StarSystem[] GenerateSystems()
         {
@@ -23,14 +25,15 @@ namespace BrowserGameBackend.Tools.GameTools
 
                     LocationX = i % galaxyWidth,
                     LocationY = i / galaxyWidth,
+                    Sector = i / sectorSize,
                     Size = random.Next(1, 9),
                     Faction = ""
                 };
                 stars[i] = star;
             }
             return stars;
-
         }
+
         public static List<Planet> GeneratePlanets(ref StarSystem[] stars)
         {
             Random random = new();
@@ -59,26 +62,27 @@ namespace BrowserGameBackend.Tools.GameTools
                     int planetSize = random.Next(1, 51);
                     if (j == CapitalSystemSize) planetSize = 70;
                     int[] resources = DecideResources(planetSize);
-                        stars[i].TotalResources += resources.Sum();
-                        Planet planet = new()
-                        {
-                            SystemId = stars[i].Id,
-                            Name = stars[i].Name + "-" + j.ToString(),
-                            Size = planetSize,
-                            Type = DecidePlanetType(planetSize),
-                            SystemPosition = j,
-                            RareMetals = resources[0],
-                            Metals = resources[1],
-                            Fuels = resources[2],
-                            Organics = resources[3],
-                        };
-                        planets.Add(planet);
-                    
+                    stars[i].TotalResources += resources.Sum();
+                    Planet planet = new()
+                    {
+                        Name = stars[i].Name + "-" + j.ToString(),
+                        Size = planetSize,
+                        Type = DecidePlanetType(planetSize),
+                        SystemPosition = j,
+                        RareMetals = resources[0],
+                        Metals = resources[1],
+                        Fuels = resources[2],
+                        Organics = resources[3],
+                        StarSystemId = stars[i].Id,
+                        StarSystem = stars[i]
+                    };
+                    stars[i].Planets.Add(planet);
+                    planets.Add(planet);
                 }
             }
             return planets;
-
         }
+
         public static int[] DecideCapitalSystems()
         {
             int left = (int)(0.3 * galaxyWidth + 7 * galaxyWidth);
@@ -86,35 +90,6 @@ namespace BrowserGameBackend.Tools.GameTools
             int bottom = (int)(0.5 * galaxyWidth + 4 * galaxyWidth);
             //coordinates will be (3, 7) (7, 7) (5, 4) at width 10 for their respective Ids
             return new int[] { left, right, bottom };
-        }
-
-        public static Planet GenerateCapitalSystemPlanets(StarSystem capital)
-        {
-            Planet planet = new ()
-            {
-                SystemId = capital.Id,
-                Name = capital.Name + "base",
-                Size = 50,
-                Type = DecidePlanetType(50),
-                SystemPosition = 3,
-                RareMetals = 50,
-                Metals = 50,
-                Fuels = 50,
-                Organics = 50
-            };
-            return planet;
-            
-            /*
-            capitals[0].Name = "Solar System";
-            capitals[0].Faction = "Solar Empire";
-            planets[0].Name = "Nova Terra";
-            capitals[1].Name = "Vega";
-            capitals[1].Faction = "Vega Legion";
-            planets[1].Name = "Vega Prime";
-            capitals[2].Name = "Funny megacorp reference";
-            capitals[2].Faction = "Azure Nebula";
-            planets[2].Name = "Another funny reference";
-            return planets;*/
         }
 
         public static Bot[] GenerateRulers()

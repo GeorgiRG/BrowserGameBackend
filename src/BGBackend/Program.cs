@@ -23,6 +23,7 @@ builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IGalaxyMapService, GalaxyMapService>();
+builder.Services.AddScoped<IGalaxyGenerationService, GalaxyGenerationService>();
 
 
 

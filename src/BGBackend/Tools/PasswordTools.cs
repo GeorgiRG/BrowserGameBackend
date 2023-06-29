@@ -30,6 +30,7 @@ namespace BrowserGameBackend.Tools
                 _algorithm
             );
         }
+
         public static bool Verify(string pass, string hashString)
         {
             string[] segments = hashString.Split(segmentDelimiter);
