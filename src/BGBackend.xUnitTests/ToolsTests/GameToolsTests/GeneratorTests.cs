@@ -15,7 +15,7 @@ namespace BGBackend.xUnitTests.ToolsTests.GameToolsTests
         [Theory]
         public void AssertResourcesAreReturned(int size)
         {
-            int[] res = GeneratorTool.DecideResources(size);
+            int[] res = GalaxyGenerationTools.CalculateAvailableResources(size);
             Assert.Equal(4, res.Length);
             Assert.True(res.Sum() <= size * 1.5 + 4);
             Assert.True(res.Sum() >= 4);

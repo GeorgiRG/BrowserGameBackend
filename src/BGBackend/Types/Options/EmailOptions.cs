@@ -2,7 +2,7 @@
 {
     public class EmailOptions
     {
-        public const string OptionName = "Gmail";
+        public const string Gmail = "Gmail";
 
         public string Sender { get; set; } = "";
         public string SenderPass { get; set; } = "";

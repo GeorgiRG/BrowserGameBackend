@@ -4,38 +4,46 @@ using Microsoft.EntityFrameworkCore;
 using BrowserGameBackend.Services;
 using BrowserGameBackend.Jobs;
 using Quartz;
-
+using BrowserGameBackend.Services.Game;
+using BrowserGameBackend.Types.Options;
+using BrowserGameBackend.Services.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 //options add PascalCase instead on camelCase on responses / removed for now
 builder.Services.AddControllersWithViews(); //.AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
 builder.Services.AddDbContext<GameContext>(options =>
                             options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnectionLocal")));
-builder.Services.AddMemoryCache(options =>
-                                {
-                                    
-                                    options.SizeLimit = 1000;
-                                    options.CompactionPercentage = 0.1;
-                                    options.TrackStatistics= true;
-                                });
+builder.Services.AddMemoryCache(
+    options =>
+    {    
+        options.SizeLimit = 1000;
+        options.CompactionPercentage = 0.1;
+        options.TrackStatistics= true;
+    });
+builder.Services.Configure<GalaxyGenerationOptions>(
+    builder.Configuration.GetSection(GalaxyGenerationOptions.GalaxyOptions));
+
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IGalaxyMapService, GalaxyMapService>();
 builder.Services.AddScoped<IGalaxyGenerationService, GalaxyGenerationService>();
+builder.Services.AddScoped<IRandomGenerator, RandomGenerator>();
+builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
-
-
-builder.Services.AddCors(options => {options.AddPolicy(name: "CorsPolicy",
-                    policy =>
-                    {
-                        policy.WithOrigins("http://localhost:4200")
-                                    .AllowAnyHeader()
-                                    .AllowAnyMethod() 
-                                    .AllowCredentials();
-                    });
-});
+builder.Services.AddCors(
+    options => 
+    {
+        options.AddPolicy(name: "CorsPolicy",
+            policy =>
+            {
+                policy.WithOrigins("http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod() 
+                        .AllowCredentials();
+            });
+    });
 //QUARTZ
 /*
 builder.Services.AddQuartz(q =>

@@ -39,10 +39,11 @@ namespace BrowserGameBackend.Services
                                                                    .SetPriority(CacheItemPriority.Low)
                                                                    .SetSize(1)
                                                                    .SetSlidingExpiration(TimeSpan.FromMinutes(15));
-
-
-
-        public UserManagementService(IMemoryCache memoryCache, GameContext context, IConfiguration config, IAuthenticationService authenticationService)
+        public UserManagementService(
+            IMemoryCache memoryCache,
+            GameContext context,
+            IConfiguration config,
+            IAuthenticationService authenticationService)
         {
             _memoryCache = memoryCache;
             _context = context;
@@ -68,16 +69,16 @@ namespace BrowserGameBackend.Services
                 userDto = _memoryCache.Get<UserDto>(sessionId);
             }
             if (userDto != null) return userDto;
-            userDto = await _context.Users
-                                .Where(usr => usr.SessionId == sessionId || usr.Email == email)
-                                .Select(usr => new UserDto(
-                                                    usr.Id,
-                                                    usr.Name!,
-                                                    usr.Faction!,
-                                                    usr.Species!,
-                                                    usr.UserSkillsId,
-                                                    usr.SessionId!))
-                                .FirstOrDefaultAsync();
+            userDto = 
+                await _context.Users.Where(user => user.SessionId == sessionId || user.Email == email)
+                                    .Select(user => new UserDto(
+                                                        user.Id,
+                                                        user.Name!,
+                                                        user.Faction!,
+                                                        user.Species!,
+                                                        user.UserSkillsId,
+                                                        user.SessionId!))
+                                    .FirstOrDefaultAsync();
             return userDto!;
         }
 
@@ -92,9 +93,8 @@ namespace BrowserGameBackend.Services
                 _memoryCache.Set(newSessionId, userDto, _userOptions);
                 if (rememberMe)
                 {
-                    await _context.Users
-                                .Where(usr => usr.Email == email || usr.SessionId == sessionId)
-                                .ExecuteUpdateAsync(usr => usr.SetProperty(usr => usr.SessionId, newSessionId));
+                    await _context.Users.Where(usr => usr.Email == email || usr.SessionId == sessionId)
+                                        .ExecuteUpdateAsync(usr => usr.SetProperty(usr => usr.SessionId, newSessionId));
                 }
                 return userDto;
             }
@@ -108,39 +108,34 @@ namespace BrowserGameBackend.Services
             
             if (await _authenticationService.EmailValidAndOriginal(email!))
             {
-                await _context.Users
-                            .Where(user => user.Id == userDto.Id )
-                            .ExecuteUpdateAsync(user => user.SetProperty(user => user.Email, email));
+                await _context.Users.Where(user => user.Id == userDto.Id )
+                                    .ExecuteUpdateAsync(user => user.SetProperty(user => user.Email, email));
             }
             if (UserInputTools.ValidFaction(faction!))
             {
                 userDto.Faction = faction!;
-                await _context.Users
-                        .Where(user => user.Id == userDto.Id)
-                        .ExecuteUpdateAsync(user => user.SetProperty(user => user.Faction, faction));
+                await _context.Users.Where(user => user.Id == userDto.Id)
+                                    .ExecuteUpdateAsync(user => user.SetProperty(user => user.Faction, faction));
             }
             if (UserInputTools.ValidSpecies(species!))
             {
                 userDto.Species = species!;
-                await _context.Users
-                        .Where(user => user.Id == userDto.Id)
-                        .ExecuteUpdateAsync(user => user.SetProperty(user => user.Species, species));
+                await _context.Users.Where(user => user.Id == userDto.Id)
+                                    .ExecuteUpdateAsync(user => user.SetProperty(user => user.Species, species));
             }
             if (password != null)
             {
                 //not done
-                await _context.Users
-                        .Where(user => user.Id == userDto.Id)
-                        .ExecuteUpdateAsync(user => user.SetProperty(user => user.Password, password));
+                await _context.Users.Where(user => user.Id == userDto.Id)
+                                    .ExecuteUpdateAsync(user => user.SetProperty(user => user.Password, password));
             }
             _memoryCache.Set(sessionId, userDto, _userOptions);
             return userDto;
         }
         public async Task<UserSkills>? GetUserSkills(UserDto userDto)
         {
-            UserSkills? userSkills = await _context.UserSkills
-                                                .Where(userSkills => userSkills.Id == userDto.UserSkillsId)
-                                                .FirstOrDefaultAsync();
+            UserSkills? userSkills = await _context.UserSkills.Where(userSkills => userSkills.Id == userDto.UserSkillsId)
+                                                              .FirstOrDefaultAsync();
             return userSkills;
         }
         public async Task<UserSkills>? UpdateUserSkills(UserDto userDto, UserSkills userSkills)

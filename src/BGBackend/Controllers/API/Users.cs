@@ -27,7 +27,7 @@ namespace BrowserGameBackend.Controllers.API
         {
             try
             {
-                string smth = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
+                string newSession = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
 
                 Console.WriteLine(Request.Cookies["sessionId"]);
                 var cookieOptions = new CookieOptions
@@ -38,7 +38,7 @@ namespace BrowserGameBackend.Controllers.API
                     SameSite = SameSiteMode.None,
                     Secure = true
                 };
-                Response.Cookies.Append("sessionId", $"{smth}", cookieOptions);
+                Response.Cookies.Append("sessionId", $"{newSession}", cookieOptions);
 
                 return Ok();
 

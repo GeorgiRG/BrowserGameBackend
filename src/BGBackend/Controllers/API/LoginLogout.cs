@@ -20,7 +20,9 @@ namespace BrowserGameBackend.Controllers.API
             IsEssential= true,
         };
 
-        public LoginLogoutController(Services.IAuthenticationService authenticationService, IUserManagementService userManagementService)
+        public LoginLogoutController(
+            Services.IAuthenticationService authenticationService,
+            IUserManagementService userManagementService)
         {
             _authenticationService = authenticationService;
             _userManagementService = userManagementService;

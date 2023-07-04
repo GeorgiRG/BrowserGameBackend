@@ -3,6 +3,7 @@ using BrowserGameBackend.Models;
 using BrowserGameBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using BrowserGameBackend.Services.Game;
 
 namespace BrowserGameBackend.Controllers.API
 {
@@ -61,10 +62,11 @@ namespace BrowserGameBackend.Controllers.API
         public async Task<IActionResult> GenerateInitial()
         {
 
-            //await _galaxyGenerationService.GenerateGalaxy();
+            await _galaxyGenerationService.GenerateGalaxy();
             //await _galaxyGenerationService.GeneratePlanets();
             //await _galaxyGenerationService.GenerateBots();
-            if (await _galaxyGenerationService.SettleFaction("Solar Empire"))
+            return Ok();   
+            /*if (await _galaxyGenerationService.SettleFaction("Solar Empire"))
             {
                 if (await _galaxyGenerationService.SettleFaction("Vega Legion"))
                 {
@@ -79,6 +81,6 @@ namespace BrowserGameBackend.Controllers.API
 
             };
             return BadRequest("solar failed");
-        }
+        */}
     }
 }

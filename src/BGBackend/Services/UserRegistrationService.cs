@@ -24,7 +24,10 @@ namespace BrowserGameBackend.Services
         private readonly GameContext _context;
         private readonly IEmailService _emailService;
         private readonly IAuthenticationService _authenticationService;
-        public UserRegistrationService(GameContext context, IEmailService emailService, IAuthenticationService authenticationService)
+        public UserRegistrationService(
+            GameContext context,
+            IEmailService emailService,
+            IAuthenticationService authenticationService)
         {
             _context = context;
             _emailService = emailService;

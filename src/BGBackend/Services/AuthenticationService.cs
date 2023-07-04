@@ -28,13 +28,15 @@ namespace BrowserGameBackend.Services
         public async Task<bool> UsernameValidAndOriginal(string username)
         {
             return UserInputTools.ValidUsername(username) &&
-                    !await _context.Users.Where(usr => usr.Name == username).AnyAsync();
+                    !await _context.Users.Where(usr => usr.Name == username)
+                                         .AnyAsync();
         }
 
         public async Task<bool> EmailValidAndOriginal(string email)
         {
             return UserInputTools.ValidEmail(email) &&
-                    !await _context.Users.Where(usr => usr.Email == email).AnyAsync();
+                    !await _context.Users.Where(usr => usr.Email == email)
+                                         .AnyAsync();
         }
 
         public async Task<string> Login(string email, string password)

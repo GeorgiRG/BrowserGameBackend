@@ -27,7 +27,7 @@ namespace BrowserGameBackend.Services
         {
             _configuration = configuration;
             emailOptions = new EmailOptions();
-            _configuration.GetSection(EmailOptions.OptionName).Bind(emailOptions);
+            _configuration.GetSection(EmailOptions.Gmail).Bind(emailOptions);
 
             if (emailOptions.Sender == null || emailOptions.SenderPass == null)
             {
