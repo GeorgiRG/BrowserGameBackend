@@ -36,8 +36,8 @@ namespace BrowserGameBackend.Tools.GameTools
         }
         public static Coordinates? GoLeft(int X, int Y, int distance, int galaxyWidth)
         {
-            if (Y < 0 || Y > galaxyWidth) return null;
-            if (X - distance > 0 && X + distance < galaxyWidth)
+            if (Y < 0 || Y > galaxyWidth - 1 || X < 0 || X > galaxyWidth - 1) return null;
+            if (X - distance > 0 && X + distance < galaxyWidth - 1)
             {
                 return new Coordinates() { X = X - distance, Y = Y };
             }
@@ -45,9 +45,9 @@ namespace BrowserGameBackend.Tools.GameTools
         } 
         public static Coordinates? GoRight(int X, int Y, int distance, int galaxyWidth)
         {
-            if (Y < 0 || Y > galaxyWidth) return null;
+            if (Y < 0 || Y > galaxyWidth - 1 || X < 0 || X > galaxyWidth - 1) return null;
 
-            if (X - distance > 0 && X + distance < galaxyWidth)
+            if (X - distance > 0 && X + distance < galaxyWidth - 1)
             {
                 return new Coordinates() { X = X + distance, Y = Y };
             }
@@ -55,9 +55,9 @@ namespace BrowserGameBackend.Tools.GameTools
         }
         public static Coordinates? GoUp(int X, int Y, int distance, int galaxyWidth)
         {
-            if (X < 0 || X > galaxyWidth) return null;
+            if (Y < 0 || Y > galaxyWidth - 1 || X < 0 || X > galaxyWidth - 1) return null;
 
-            if (Y - distance >= 0 && Y - distance < galaxyWidth)
+            if (Y - distance >= 0 && Y + distance < galaxyWidth - 1)
             {
                 return new Coordinates(){ X = X , Y = Y + distance };
             }
@@ -65,9 +65,9 @@ namespace BrowserGameBackend.Tools.GameTools
         }
         public static Coordinates? GoDown(int X, int Y, int distance, int galaxyWidth)
         {
-            if (X < 0 || X > galaxyWidth) return null;
+            if (Y < 0 || Y > galaxyWidth - 1 || X < 0 || X > galaxyWidth - 1) return null;
 
-            if (Y - distance >= 0 && Y - distance < galaxyWidth)
+            if (Y - distance >= 0 && Y - distance < galaxyWidth - 1)
             {
                 return new Coordinates(){ X = X , Y = Y - distance };
             }

@@ -5,6 +5,7 @@ using BrowserGameBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Globalization;
 using BrowserGameBackend.Services.Game;
+using BrowserGameBackend.Enums;
 
 namespace BrowserGameBackend.Controllers.API
 {
@@ -14,7 +15,7 @@ namespace BrowserGameBackend.Controllers.API
     {
         private readonly IEmailService _emailService;
 
-        public Testing(IEmailService emailService, IGalaxyMapService galaxyMapService) 
+        public Testing(IEmailService emailService) 
         {
             _emailService = emailService;
         }
@@ -22,13 +23,15 @@ namespace BrowserGameBackend.Controllers.API
         [HttpGet]
         public async Task<ActionResult> Test()
         {
+            Factions factions = new ();
+            Dictionary<int, string> asdf = factions.Enumeration;
+            foreach(var pair in asdf) { Console.WriteLine(pair.Key + "=" + pair.Value); }
             return Ok();
         }
 
         [HttpGet("email")]
         public async Task<ActionResult> Testmail()
         {
-            Console.WriteLine("Woorks");
             await _emailService.Send("grgeorgi93@gmail.com", "Hello", "This is a test email again!");
             return Ok();
         }

@@ -77,6 +77,7 @@ namespace BrowserGameBackend.Services.Game
             StarSystem[] stars = await _context.StarSystems.ToArrayAsync();
             List<Planet> planets = new();
             int[] capitals = GalaxyGenerationTools.CalculateCapitalSystemsId(_galaxyOptions.GalaxyWidth);
+            Factions factions = new();
             for (int i = 0; i < stars.Length; i++)
             {
                 if (!capitals.Contains(i))
@@ -108,7 +109,7 @@ namespace BrowserGameBackend.Services.Game
             {
                 Planet planet = new()
                 {
-                    Name = ((FactionCapitals)i).ToString(),
+                    Name = factions.FactionCapital(i),
                     Size = 100,
                     SystemPosition = 1,
                     SurfaceTemperature = 0,
@@ -116,7 +117,7 @@ namespace BrowserGameBackend.Services.Game
                     StarSystem = stars[capitals[i]]
                 };
                 stars[capitals[i]].Planets.Add(planet);
-                stars[capitals[i]].Faction = ((Factions)i).ToString();
+                stars[capitals[i]].Faction = factions.FromKey(i);
                 planets.Add(planet);
             }
             
@@ -124,23 +125,26 @@ namespace BrowserGameBackend.Services.Game
             {
                 await _context.Planets.AddAsync(planets[i]);
             }
-            await _context.SaveChangesAsync();
-            return true;
+            return await _context.SaveChangesAsync() > 0;
         }
         public async Task<bool> GenerateBots()
         {
-            int botAmount =
-                (int)(_galaxyOptions.GalaxySize * _galaxyOptions.PercentageBotControlledSystems)
-                    / (_galaxyOptions.MaxBotPlanets + _galaxyOptions.MinBotPlanets) / 2;
+            int planetsPerSystem =  _context.Planets.Count() / _galaxyOptions.GalaxySize;
+            int averageFreePlanets = (_galaxyOptions.LeaveFreeMin + _galaxyOptions.LeaveFreeMax) / 2;
+            int planetsForBots = (int)(_galaxyOptions.GalaxySize * _galaxyOptions.PercentageBotControlledSystems) * planetsPerSystem;
+            int averageBotPlanets = (_galaxyOptions.MaxBotPlanets + _galaxyOptions.MinBotPlanets) / 2 - averageFreePlanets;
+            //bot amount is calculated based on the planets needed to control the approximate system % from settings
+            int botAmount = planetsForBots / averageBotPlanets;
             Bot[] bots = new Bot[botAmount];
+            FightingTraits fightingTraits = new();
+            EconomyTraits economyTraits = new();
+            Factions factions = new();
+
             for (int i = 0; i < bots.Length; i++)
             {
-                string fightingTrait = 
-                    ((FightingTraits)_randomGenerator.IntInRange(0, Enum.GetNames(typeof(FightingTraits)).Length)).ToString();
-                string economyTrait =
-                    ((EconomyTraits)_randomGenerator.IntInRange(0, Enum.GetNames(typeof(EconomyTraits)).Length)).ToString();
-                string faction =
-                    ((Factions)_randomGenerator.IntInRange(0, Enum.GetNames(typeof(Factions)).Length)).ToString();
+                string fightingTrait = fightingTraits.FromKey(_randomGenerator.IntInRange(0, fightingTraits.Count() - 1));
+                string economyTrait = fightingTraits.FromKey(_randomGenerator.IntInRange(0, economyTraits.Count() - 1));
+                string faction = factions.FromKey(_randomGenerator.IntInRange(0, factions.Count() - 1));
                 int age = _randomGenerator.IntInRange(5, 91);
                 bots[i] = new Bot()
                 {
@@ -156,17 +160,16 @@ namespace BrowserGameBackend.Services.Game
                     LastChecked = _dateTimeProvider.UtcNow()
                 };
             }
-            for (int i = 0; i < Enum.GetNames(typeof(Factions)).Length; i++)
+            for (int i = 0; i < factions.Count(); i++)
             {
-                string faction = ((Factions)i).ToString();
+                string faction = factions.FromKey(i);
                 await _context.Bots.AddAsync(GalaxyGenerationTools.GenerateRuler(faction));
             }
             for (int i = 0; i < bots.Length; i++)
             {
                 await _context.Bots.AddAsync(bots[i]);
             }
-            await _context.SaveChangesAsync();
-            return true;
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> SettleFaction(string faction)
@@ -254,7 +257,9 @@ namespace BrowserGameBackend.Services.Game
                                                             + planets[current].Fuels + planets[current].Organics;
                                     bots[currentBotPos].PlanetsAmount--;
                                     planetsLeftToSettle--;
-                                    current += _randomGenerator.IntInRange(1, 3); //skip planets to have slots for players
+                                    current +=
+                                        //skip planets to have slots for players
+                                        _randomGenerator.IntInRange(_galaxyOptions.LeaveFreeMin, _galaxyOptions.LeaveFreeMax); 
                                     currentBotPos++;
                                 }
                                 else

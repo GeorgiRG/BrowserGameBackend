@@ -21,7 +21,7 @@ namespace BrowserGameBackend.Tools.GameTools
             //they are spread at edges like a hexagon
             //locations are predetermined to have minor factions be based
             //around their origin faction
-            int[] locations = new int[6] //6 factions, ordered as the Factions enum
+            int[] locations = new int[6] //6 factions, ordered as the Factions enum, move it to factions enum
             {
                 (int)(0.5 * galaxyWidth + 0 * galaxyWidth * galaxyWidth),   //robots - X 50%:Y 0%
                 (int)(0.9 * galaxyWidth + 0.3 * galaxyWidth * galaxyWidth), //vega- X 90%:Y 30%
@@ -35,7 +35,8 @@ namespace BrowserGameBackend.Tools.GameTools
 
         public static Bot GenerateRuler(string faction)
         {
-            Bot ruler = new Bot()
+            Console.WriteLine(faction + " faction ");
+            Bot ruler = new()
             {
                 PowerLevel = 999,
                 AvailableResources = 999,
@@ -83,6 +84,10 @@ namespace BrowserGameBackend.Tools.GameTools
                     ruler.EconomyTrait = "Liberator";
                     break;
                 default:
+                    ruler.Name = "failed";
+                    ruler.FleetTemplate = 500;
+                    ruler.FightingTrait = "failed";
+                    ruler.EconomyTrait = "failed";
                     break;
             }
             return ruler;

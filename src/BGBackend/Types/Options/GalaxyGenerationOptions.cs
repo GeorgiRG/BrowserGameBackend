@@ -13,5 +13,8 @@
         public int MinPlanetResources { get; set; }
         public int FleetTemplateDifficulty { get; set; }//Higher fleet numbers have better composition, 99 is max
         public float PercentageBotControlledSystems { get; set; }
+        //if faction controlled systems should have free planets 
+        public int LeaveFreeMin { get; set; } 
+        public int LeaveFreeMax { get; set; }
     }
 }

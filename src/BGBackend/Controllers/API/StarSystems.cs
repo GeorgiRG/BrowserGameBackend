@@ -4,6 +4,7 @@ using BrowserGameBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using BrowserGameBackend.Services.Game;
+using BrowserGameBackend.Enums;
 
 namespace BrowserGameBackend.Controllers.API
 {
@@ -61,26 +62,26 @@ namespace BrowserGameBackend.Controllers.API
         [HttpGet]
         public async Task<IActionResult> GenerateInitial()
         {
-
-            await _galaxyGenerationService.GenerateGalaxy();
-            //await _galaxyGenerationService.GeneratePlanets();
-            //await _galaxyGenerationService.GenerateBots();
-            return Ok();   
-            /*if (await _galaxyGenerationService.SettleFaction("Solar Empire"))
+            bool galaxyResult = await _galaxyGenerationService.GenerateGalaxy();
+            bool planetsResult = await _galaxyGenerationService.GeneratePlanets();
+            bool botResult = await _galaxyGenerationService.GenerateBots();
+            if(!galaxyResult || !planetsResult || !botResult)
             {
-                if (await _galaxyGenerationService.SettleFaction("Vega Legion"))
+                return BadRequest(
+                    $"creation failed: galaxy{galaxyResult}," +
+                    $"planets: {planetsResult}," + 
+                    $"bots: {botResult}");
+            }
+
+            Factions factions = new();
+            for(int i = 0; i < factions.Count(); i++)
+            {
+                if(await _galaxyGenerationService.SettleFaction(factions.FromKey(i)) == false)
                 {
-                    if (await _galaxyGenerationService.SettleFaction("Azure Nebula"))
-                    {   
-                        return Ok();
-                    }
-                    return BadRequest("azure failed");
-
+                    return BadRequest("settling " + factions.FromKey(i) + " failed");
                 }
-                return BadRequest("vega failed");
-
-            };
-            return BadRequest("solar failed");
-        */}
+            }
+            return Ok();
+        }
     }
 }
