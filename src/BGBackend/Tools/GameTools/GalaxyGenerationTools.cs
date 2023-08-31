@@ -81,7 +81,7 @@ namespace BrowserGameBackend.Tools.GameTools
                     ruler.Name = "The Grey Council";
                     ruler.FleetTemplate = 600;
                     ruler.FightingTrait = "Chaotic";
-                    ruler.EconomyTrait = "Liberator";
+                    ruler.EconomyTrait = "Liberators";
                     break;
                 default:
                     ruler.Name = "failed";

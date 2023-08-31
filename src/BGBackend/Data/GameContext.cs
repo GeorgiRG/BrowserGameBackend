@@ -11,6 +11,7 @@ namespace BrowserGameBackend.Data
         private readonly IConfiguration _config;
         public DbSet<User> Users { get; set; } = default!;
         public DbSet<UserSkills> UserSkills { get; set; }
+        public DbSet<Sector> Sectors { get; set; }
         public DbSet<StarSystem> StarSystems { get; set; }
         public DbSet<Planet> Planets { get; set; }
         public DbSet<Bot> Bots { get; set; }

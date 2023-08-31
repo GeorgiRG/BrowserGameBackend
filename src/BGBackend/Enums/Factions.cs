@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
@@ -26,6 +27,12 @@ namespace BrowserGameBackend.Enums
             { 4 , "Piraty name"}, //Anarchists
             { 5 , "Wallstreet"}, //Azure
         };
+        public string NaturalOrder { get; } = "Natural Order";
+        public string Vega { get; } = "Vega Legion";
+        public string Swarm { get; } = "Swarm";
+        public string Solar { get; } = "Solar Empire";
+        public string Azure { get; } = "Azure Nebula";
+        public string Pandemonium { get; } = "Pandemonium";
 
         public int Count()
         {

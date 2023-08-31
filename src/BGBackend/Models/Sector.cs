@@ -13,9 +13,12 @@
         public int Bots { get; set; } = 0;
         public int TotalPlanets { get; set; }
         public int FreeSystems { get; set; }
-        public int RedControl { get; set; } = 0;
-        public int GreenControl { get; set; } = 0;
-        public int BlueControl { get; set; } = 0;   
-        public int GreyControl { get; set; } = 0; 
+        public int SolarControl { get; set; } = 0;
+        public int VegaControl { get; set; } = 0;
+        public int AzureControl { get; set; } = 0;   
+        public int RobotsControl { get; set; } = 0;
+        public int PandemoniumControl { get; set; } = 0;
+        public int SwarmControl { get; set; } = 0;
+
     }
 }

@@ -8,16 +8,17 @@ using BrowserGameBackend.Enums;
 
 namespace BrowserGameBackend.Controllers.API
 {
-    [Route("starsystems")]
+    [Route("map")]
     [ApiController]
-    public class StarSystemsController : ControllerBase
+    public class MapController : ControllerBase
     {
         private readonly IGalaxyMapService _galaxyMapService;
         private readonly IGalaxyGenerationService _galaxyGenerationService;
         private readonly IUserManagementService _userManagementService;
-        public StarSystemsController(IGalaxyMapService galaxyMapService, 
-                                    IGalaxyGenerationService galaxyGenerationService, 
-                                    IUserManagementService userManagementService)
+        public MapController(
+            IGalaxyMapService galaxyMapService, 
+            IGalaxyGenerationService galaxyGenerationService, 
+            IUserManagementService userManagementService)
         {
             _galaxyMapService = galaxyMapService;
             _galaxyGenerationService = galaxyGenerationService;
@@ -30,11 +31,12 @@ namespace BrowserGameBackend.Controllers.API
             return Ok(await _galaxyMapService.GetStarSystems());
         }
 
+        [Route("")]
+
         [Route("{id}")]
         [HttpGet]
         public async Task<IActionResult> GetById(int id)
         {
-            
             try
             {
                 //UserDto? userDto = await _userManagementService.GetUserDto(sessionId: Request.Cookies["sessionId"])!;
@@ -81,6 +83,7 @@ namespace BrowserGameBackend.Controllers.API
                     return BadRequest("settling " + factions.FromKey(i) + " failed");
                 }
             }
+            await _galaxyGenerationService.CreateSectors();
             return Ok();
         }
     }
