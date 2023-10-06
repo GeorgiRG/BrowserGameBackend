@@ -4,6 +4,8 @@
     /// Holds a summary of the star systems in a sector that shows on hovering
     /// Updated through quartz jobs 
     /// 'Control' shows what % of the sector each faction has
+    /// 
+    /// Not connected to star systems in db as there might be a rework
     /// </summary>
     public class Sector
     {

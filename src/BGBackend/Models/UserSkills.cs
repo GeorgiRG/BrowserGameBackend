@@ -13,6 +13,7 @@ namespace BrowserGameBackend.Models
         public int Engineering { get; set; } = 5;
         public int Economy { get; set; } = 5;
         public int Fame { get; set; } = 0;
-        public User? User { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; } = null!;
     }
 }

@@ -76,7 +76,6 @@ namespace BrowserGameBackend.Services
                                                         user.Name!,
                                                         user.Faction!,
                                                         user.Species!,
-                                                        user.UserSkillsId,
                                                         user.SessionId!))
                                     .FirstOrDefaultAsync();
             return userDto!;
@@ -134,7 +133,7 @@ namespace BrowserGameBackend.Services
         }
         public async Task<UserSkills>? GetUserSkills(UserDto userDto)
         {
-            UserSkills? userSkills = await _context.UserSkills.Where(userSkills => userSkills.Id == userDto.UserSkillsId)
+            UserSkills? userSkills = await _context.UserSkills.Where(userSkills => userSkills.UserId == userDto.Id)
                                                               .FirstOrDefaultAsync();
             return userSkills;
         }

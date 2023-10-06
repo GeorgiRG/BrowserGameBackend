@@ -28,14 +28,19 @@ namespace BrowserGameBackend.Controllers.API
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(await _galaxyMapService.GetStarSystems());
+            return Ok(await _galaxyMapService.GetSectors());
         }
-
-        [Route("")]
 
         [Route("{id}")]
         [HttpGet]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetSector(int id)
+        {
+            return Ok(await _galaxyMapService.GetSectorStarSystems(id));
+        }
+
+        [Route("{sectorId}/star-system/{id}")]
+        [HttpGet]
+        public async Task<IActionResult> GetStarSystemDto(int id)
         {
             try
             {
@@ -43,7 +48,7 @@ namespace BrowserGameBackend.Controllers.API
                 //if (userDto == null) return Unauthorized("Session expired");
 
                 Console.WriteLine(id);
-                List<StarSystemDto>? starDto = await _galaxyMapService.GetStarSystem(id)!;
+                StarSystemDto? starDto = await _galaxyMapService.GetStarSystem(id)!;
                 if (starDto != null)
                 {
                     return Ok(starDto);
@@ -64,6 +69,7 @@ namespace BrowserGameBackend.Controllers.API
         [HttpGet]
         public async Task<IActionResult> GenerateInitial()
         {
+            
             bool galaxyResult = await _galaxyGenerationService.GenerateGalaxy();
             bool planetsResult = await _galaxyGenerationService.GeneratePlanets();
             bool botResult = await _galaxyGenerationService.GenerateBots();

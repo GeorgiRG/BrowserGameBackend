@@ -62,9 +62,9 @@ namespace BrowserGameBackend.Services
                 UserSkills userSkills = new()
                 {
                     User = user,
+                    UserId = user.Id,
                 };
                 user.UserSkills = userSkills;
-                user.UserSkillsId = userSkills.Id;
                 _context.Users.Add(user);
                 _context.UserSkills.Add(userSkills);
 

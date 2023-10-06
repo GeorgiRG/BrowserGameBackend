@@ -52,19 +52,29 @@ namespace BrowserGameBackend.Services.Game
 
         public async Task<bool> GenerateGalaxy()
         {
-       
+            int middleStar = (_galaxyOptions.SectorSize / 2) - (int)Math.Round(Math.Sqrt(_galaxyOptions.SectorSize) / 2) ;
             StarSystem[] stars = new StarSystem[_galaxyOptions.GalaxySize];
+            int sectorHeight = (int)Math.Floor(Math.Sqrt(_galaxyOptions.SectorSize)); //10 if no changes
             for (int i = 0; i < _galaxyOptions.GalaxySize; i++)
             {
+                int locationX = i % _galaxyOptions.GalaxyWidth;
+                int locationY = i / _galaxyOptions.GalaxyWidth;
+                int sector = locationX / sectorHeight + (locationY - (locationY % sectorHeight));
                 StarSystem star = new()
                 {
                     Name = _randomGenerator.IntInRange(111, 1000000).ToString("X"),
-                    LocationX = i % _galaxyOptions.GalaxyWidth,
-                    LocationY = i / _galaxyOptions.GalaxyWidth,
-                    Sector = i / _galaxyOptions.SectorSize,
+                    LocationX = locationX,
+                    LocationY = locationY,
+                    Sector = sector,
                     Size = _randomGenerator.IntInRange(1, 10),
                     Faction = ""
                 };
+
+                //put relays in the middle of a sector
+                if((star.Sector - 1) * _galaxyOptions.SectorSize + middleStar == i)
+                {
+                    star.Relay = true;
+                }
                 stars[i] = star;
             }
 
@@ -183,11 +193,12 @@ namespace BrowserGameBackend.Services.Game
                                             .OrderByDescending(bot => bot.PowerLevel)
                                             .FirstAsync();
             Planet[] planets =
-                await _context.Planets.Where(planet => planet.StarSystemId == capital.Id && planet.OwnerId == 0)
+                await _context.Planets.Where(planet => planet.StarSystemId == capital.Id && planet.Owned == false)
                                     .ToArrayAsync();
             for (int j = 0; j < planets.Length; j++)
             {
-                planets[j].OwnerId = rulerBot.Id;
+                planets[j].BotId = rulerBot.Id;
+                planets[j].Bot = rulerBot;
                 rulerBot.PlanetsAmount--;
             }
             bool result = await _context.SaveChangesAsync() > 0;
@@ -241,7 +252,7 @@ namespace BrowserGameBackend.Services.Game
                             star.Faction = faction; //make sure beforehand the amount of bots is such that they don't leak in factions' systems
 
                             Planet[] planets = 
-                                await _context.Planets.Where(planet => planet.StarSystemId == star.Id && planet.OwnerId == 0)
+                                await _context.Planets.Where(planet => planet.StarSystemId == star.Id && planet.Owned == false)
                                                      .ToArrayAsync();
                             int current = 0;
                             while (current < planets.Length && planetsLeftToSettle > 0)
@@ -252,8 +263,10 @@ namespace BrowserGameBackend.Services.Game
                                 }
                                 if (bots[currentBotPos].PlanetsAmount > 0)
                                 {
-                                    planets[current].OwnerId = bots[currentBotPos].Id;
-                                    bots[currentBotPos].AvailableResources =
+                                    planets[current].BotId = bots[currentBotPos].Id;
+                                    planets[current].Bot = bots[currentBotPos];
+                                    bots[currentBotPos].Planets.Add(planets[current].Id);
+                                    bots[currentBotPos].AvailableResources +=
                                                             planets[current].RareMetals + planets[current].Metals
                                                             + planets[current].Fuels + planets[current].Organics;
                                     bots[currentBotPos].PlanetsAmount--;
@@ -287,51 +300,66 @@ namespace BrowserGameBackend.Services.Game
         public async Task<bool> CreateSectors()
         {
             using var transaction = _context.Database.BeginTransaction();
-
             try
             {
                 int sectorAmount = _galaxyOptions.GalaxySize / _galaxyOptions.SectorSize;
-                for (int i = 0; i < sectorAmount; i++)
+                for (int i = 1; i <= sectorAmount; i++)
                 {
                     HashSet<int> playerIds = new();
                     int totalPlanets = 0;
                     List<StarSystemDto> starSystems =
-                        await _context.StarSystems.Where(star => star.Sector == i)
-                                               .GroupJoin(
-                                                _context.Planets,
-                                                star => star,
-                                                planet => planet.StarSystem,
-                                                (star, planets) => new StarSystemDto
-                                                {
-                                                    StarSystemId = star.Id,
-                                                    Name = star.Name,
-                                                    LocationX = star.LocationX,
-                                                    LocationY = star.LocationY,
-                                                    TotalResources = star.TotalResources,
-                                                    Faction = star.Faction,
-                                                    Planets = planets
-                                                })
-                                            .ToListAsync();
+                        await _context.StarSystems.Where(star => star.Sector == i).Select(
+                                        star => new StarSystemDto
+                                        (
+                                        star.Id,
+                                        star.Name!,
+                                        star.LocationX,
+                                        star.LocationY,
+                                        star.Size,
+                                        star.TotalResources,
+                                        star.Faction,
+                                        star.Planets.Select(planet => new PlanetBasicViewDto(
+                                            planet.Id,
+                                            planet.Name!,
+                                            planet.Size,
+                                            planet.SurfaceTemperature,
+                                            planet.SystemPosition,
+                                            planet.RareMetals,
+                                            planet.Metals,
+                                            planet.Fuels,
+                                            planet.Organics,
+                                            planet.Owned,
+                                            planet.StarSystemId,
+                                            planet.User,
+                                            planet.Bot
+                                            ))
+                                        ))
+                                        .ToListAsync();
+                    int bots = 0;
+                    int players = 0;
                     for (int j = 0; j < starSystems.Count; j++)
                     {
                         totalPlanets += starSystems[j].Planets.Count();
 
-                        foreach (Planet planet in starSystems[j].Planets)
+                        foreach (PlanetBasicViewDto planet in starSystems[j].Planets)
                         {
-                            if (planet.OwnerId != 0)
+                            if (planet.BotId != null)
                             {
-                                playerIds.Add(planet.OwnerId);
+                                bots++;
+                            }
+                            else if(planet.UserId != null)
+                            {
+                                players++;
                             }
                         }
                     }
-                    int playerCount = await _context.Users.Where(user => playerIds.Contains(user.Id)).CountAsync();
 
                     Sector sector = new()
                     {
                         GameId = i,
                         TotalPlanets = totalPlanets,
-                        Players = playerCount,
-                        Bots = playerIds.Count - playerCount,
+                        Players = players,
+                        Bots = bots,
                         FreeSystems = starSystems.Where(star => star.Faction == String.Empty).Count(),
                         VegaControl = starSystems.Where(star => star.Faction == factions.Vega).Count() * 100 / _galaxyOptions.SectorSize,
                         AzureControl = starSystems.Where(star => star.Faction == factions.Azure).Count() * 100 / _galaxyOptions.SectorSize,
@@ -352,7 +380,7 @@ namespace BrowserGameBackend.Services.Game
                 Console.WriteLine(ex + "\n" + "Sector creation failed");
                 transaction.Rollback();
                 return false;
-            }            
+            }      
         }
     }
 }

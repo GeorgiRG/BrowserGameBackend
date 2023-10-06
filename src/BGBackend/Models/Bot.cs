@@ -28,6 +28,7 @@
         public int PlayerIdPriorityTop { get; set; } = 0; 
         public int PlayerIdPrioritySecondary { get; set; } = 0; 
         public DateTime LastChecked { get; set; }
+        public List<int> Planets { get; set; } = new List<int>();
         public int Age { get; set; }
     }
 }
