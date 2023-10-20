@@ -4,14 +4,9 @@
 Built with ASP.NET and Entity Framework
 
 **Features done:**\
--Authentication\
--Registration + email confirmation\
--Login and sessions
-
-**Features to be done:**\
--Proper deployment\
--Neccessary game logic and their respective routes\
--Servers\
--AI logic (Quartz jobs)\
--Optional payment options\
--Most likely multiple other things that I haven't thought of yet
+-Registration\
+-Login and sessions\
+-Email confirmation\
+-Galaxy/map generation\
+-Map routes\
+-Character creation
