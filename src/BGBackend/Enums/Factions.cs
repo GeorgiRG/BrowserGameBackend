@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Linq;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
-using System.Xml.Linq;
-
-namespace BrowserGameBackend.Enums
+﻿namespace BrowserGameBackend.Enums
 {
     public class Factions : IEnumeration
     {

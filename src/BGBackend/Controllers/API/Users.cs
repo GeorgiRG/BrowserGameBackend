@@ -15,6 +15,14 @@ namespace BrowserGameBackend.Controllers.API
         private readonly Services.IAuthenticationService _authenticationService;
         private readonly IUserRegistrationService _userRegistrationService;
         private readonly IUserManagementService _userManagementService;
+        public CookieOptions cookieOptions = new()
+        {
+            Expires = DateTime.Now.AddDays(1),
+            Path = "/",
+            HttpOnly = true,
+            SameSite = SameSiteMode.None,
+            Secure = true
+        };
 
         public UsersController(IUserRegistrationService userRegistrationService, Services.IAuthenticationService authenticationService, IUserManagementService userManagementService)
         {
@@ -22,25 +30,21 @@ namespace BrowserGameBackend.Controllers.API
             _authenticationService = authenticationService;
             _userManagementService = userManagementService;
         }
+
         [HttpGet]
-        public async Task<IActionResult> Get(string? sessionId, string? email)
+        public async Task<IActionResult> GetSelf(string? sessionId, string? email)
         {
             try
             {
-                string newSession = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
-
-                Console.WriteLine(Request.Cookies["sessionId"]);
-                var cookieOptions = new CookieOptions
+                UserDto? userDto = await _userManagementService.GetUserDto(sessionId, email)!;
+                if (userDto != null)
                 {
-                    Expires = DateTime.Now.AddDays(1),
-                    Path = "/",
-                    HttpOnly= true,
-                    SameSite = SameSiteMode.None,
-                    Secure = true
-                };
-                Response.Cookies.Append("sessionId", $"{newSession}", cookieOptions);
-
-                return Ok();
+                    return Ok(userDto);
+                }
+                else
+                {
+                    return NotFound();
+                }
 
 
             }catch(Exception ex)
@@ -74,26 +78,33 @@ namespace BrowserGameBackend.Controllers.API
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody, Required] User user)
+        public async Task<IActionResult> Register([FromBody, Required] UserRegistrationDto userData)
         {
-            GeneralResponse response = new ();
-            Console.WriteLine("{0}, {1}, {2}", user.Name, user.Email, user.Password);
-            string result = await _userRegistrationService.CreateUser(user);
+            Console.WriteLine("{0}, {1}, {2}", userData.Name, userData.Email, userData.Password);
+            string result = await _userRegistrationService.CreateUser(userData);
             if (result != "Ok") 
             {
-                response.Message = "There were errors in user creation";
-                response.Errors = result ?? "Bad input";
-                return BadRequest(response) ;
+                return BadRequest("Bad input") ;
             }
-     
-            response.Message = "User created successfully";
-            return Ok(response);
+
+            //user input is already checked on registering
+            UserDto userDto = await _userManagementService.LoginUser(email: userData.Email, rememberMe: false)!;
+            if (userDto != null)
+            {
+                Response.Cookies.Append("sessionId", $"{userDto.SessionId}", cookieOptions);
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Could not login user");
+            }
         }
 
-        [Route("confirmEmail/{confirmationCode}")]
+        [Route("confirmEmail")]
         [HttpPost]
-        public async Task<IActionResult> ConfirmEmail([Required] string confirmationCode)
+        public async Task<IActionResult> ConfirmEmail(string confirmationCode)
         {
+            Console.WriteLine($"Confirm email: {confirmationCode}");    
             GeneralResponse response = new ();
             string result = await _userRegistrationService.ConfirmEmail(confirmationCode);
             if (result == null || result != "Ok")
@@ -107,22 +118,28 @@ namespace BrowserGameBackend.Controllers.API
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateCharacter(string? email = null, string? faction = null, string? species = null, string? password = null)
+        public async Task<IActionResult> UpdateCharacter(string faction, string species)
         {
             string? sessionId = Request.Cookies["sessionId"];
-            UserDto? userDto = await _userManagementService.UpdateUser(sessionId!, email, faction, species, password)!;
-            if (userDto == null) return BadRequest("Invalid session or input");
+            if (!await _authenticationService.SessionIsValid(sessionId!)) 
+            {
+                return Unauthorized();
+            }
+            UserDto? userDto = await _userManagementService.CharacterCreation(sessionId!, faction, species)!;
+            if (userDto == null) return BadRequest("Invalid input");
             return Ok(userDto);
         }
         
         [Route("levelUp")]
         [HttpPut]
-        public async Task<IActionResult> LevelUp([Required, FromBody] UserSkills userSkills)
+        public async Task<IActionResult> LevelUp([Required, FromBody] LevelUpSkillsDto userSkills)
         {
+            Console.WriteLine(userSkills.SpaceWarfare + " works");
             string? sessionId = Request.Cookies["sessionId"];
-            UserDto? userDto = await _userManagementService.GetUserDto(sessionId: sessionId)!;
-            if (userDto == null) return Unauthorized("Session expired");
-            UserSkills? updatedUserSkills = await _userManagementService.UpdateUserSkills(userDto, userSkills)!;
+            if (!await _authenticationService.SessionIsValid(sessionId!))
+                return Unauthorized();
+            
+            UserSkills? updatedUserSkills = await _userManagementService.UpdateUserSkills(sessionId!, userSkills)!;
             if (updatedUserSkills == null) return BadRequest("Invalid input");
             return Ok(updatedUserSkills);
         }
@@ -137,7 +154,6 @@ namespace BrowserGameBackend.Controllers.API
         [HttpDelete]
         public async Task<IActionResult> DeleteUnconfirmed([FromBody, Required] User user)
         {
-
             return Ok();
         }
     }

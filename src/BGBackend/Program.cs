@@ -31,6 +31,8 @@ builder.Services.AddScoped<IGalaxyMapService, GalaxyMapService>();
 builder.Services.AddScoped<IGalaxyGenerationService, GalaxyGenerationService>();
 builder.Services.AddScoped<IRandomGenerator, RandomGenerator>();
 builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+builder.Services.AddScoped<IFactionService, FactionService> ();
+builder.Services.AddScoped<ISpeciesService, SpeciesService>();
 
 builder.Services.AddCors(
     options => 

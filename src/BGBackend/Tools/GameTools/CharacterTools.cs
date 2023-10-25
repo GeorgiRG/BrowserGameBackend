@@ -1,11 +1,12 @@
 ﻿using BrowserGameBackend.Models;
+using BrowserGameBackend.Dto;
 
 namespace BrowserGameBackend.Tools.GameTools
 {
     public static class CharacterTools
     {
         const int SkillPoints = 10; //skills points on level up
-        public static UserSkills? LevelUp(UserSkills oldUserSkills, UserSkills userSkills)
+        public static UserSkills? LevelUp(UserSkills oldUserSkills, LevelUpSkillsDto userSkills)
         {
             if(ValidSkills(oldUserSkills, userSkills))
             {
@@ -22,7 +23,7 @@ namespace BrowserGameBackend.Tools.GameTools
             else return null;
         }
 
-        public static bool ValidSkills(UserSkills oldUserSkills, UserSkills userSkills)
+        public static bool ValidSkills(UserSkills oldUserSkills, LevelUpSkillsDto userSkills)
         {
             int spaceWarfare = userSkills.SpaceWarfare - oldUserSkills.SpaceWarfare;
             int landWarfare = userSkills.LandWarfare - oldUserSkills.LandWarfare;

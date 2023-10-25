@@ -10,12 +10,13 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using System.Net;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using BrowserGameBackend.Dto;
 
 namespace BrowserGameBackend.Services
 {
     public interface IUserRegistrationService
     {
-        public Task<string> CreateUser(User user);
+        public Task<string> CreateUser(UserRegistrationDto user);
         public Task<string> SendConfirmationEmail(User user);
         public Task<string> ConfirmEmail(string confirmCode);
     }
@@ -34,40 +35,45 @@ namespace BrowserGameBackend.Services
             _authenticationService = authenticationService;
         }
 
-        public async Task<string> CreateUser(User user)
+        public async Task<string> CreateUser(UserRegistrationDto userData)
         {
             try { 
                 //check inputs
-                if (user == null)
+                if (userData == null)
                 {
-                    return "No user provided";
+                    return "No user data provided";
                 }
                 else
                 {
-                    if (!UserInputTools.ValidUsername(user.Name!)) return "Invalid username";
-                    if (!UserInputTools.ValidEmail(user.Email!)) return "Invalid email";
-                    if (!UserInputTools.ValidPassword(user.Password!)) return "Invalid password";
+                    if (!UserInputTools.ValidUsername(userData.Name!)) return "Invalid username";
+                    if (!UserInputTools.ValidEmail(userData.Email!)) return "Invalid email";
+                    if (!UserInputTools.ValidPassword(userData.Password!)) return "Invalid password";
                 }
-                //"Exists" check, username and email are checked beforehand to save a trip to db on bad input
-                if (!await _authenticationService.UsernameValidAndOriginal(user.Name!)) return "Username taken";
-                if (!await _authenticationService.EmailValidAndOriginal(user.Email!)) return "Email taken";
-
-                //send confirmation email
-                string emailResult = await SendConfirmationEmail(user);
-                if (emailResult != "Ok") return emailResult;
+                //"Exists" and validity check
+                if (!await _authenticationService.UsernameValidAndOriginal(userData.Name!)) return "Username taken";
+                if (!await _authenticationService.EmailValidAndOriginal(userData.Email!)) return "Email taken";
 
                 //hash password, create user
-                user.Password = PasswordTools.Hash(user.Password!);
-                user.LastLogin = DateTime.UtcNow;
+                User user = new()
+                {
+                    Name = userData.Name,
+                    Email = userData.Email,
+                    Password = PasswordTools.Hash(userData.Password!),
+                    LastLogin = DateTime.UtcNow
+                };
                 UserSkills userSkills = new()
                 {
                     User = user,
                     UserId = user.Id,
                 };
                 user.UserSkills = userSkills;
+
+                //send confirmation email
+                string emailResult = await SendConfirmationEmail(user);
+                if (emailResult != "Ok") return emailResult;
+
                 _context.Users.Add(user);
                 _context.UserSkills.Add(userSkills);
-
                 await _context.SaveChangesAsync();
                 return "Ok";
             }

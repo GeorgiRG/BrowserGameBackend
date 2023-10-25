@@ -3,9 +3,8 @@
     public interface IDateTimeProvider
     {
         public DateTime UtcNow();
-
-
     }
+
     public class DateTimeProvider : IDateTimeProvider
     {
         public DateTime UtcNow()

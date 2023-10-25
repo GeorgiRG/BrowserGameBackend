@@ -87,9 +87,10 @@ namespace BrowserGameBackend.Services.Game
 
         public async Task<bool> GeneratePlanets()
         {
-            StarSystem[] stars = await _context.StarSystems.ToArrayAsync();
+            StarSystem[] stars = await _context.StarSystems.OrderBy(star => star.Id).ToArrayAsync();
             List<Planet> planets = new();
             int[] capitals = GalaxyGenerationTools.CalculateCapitalSystemsId(_galaxyOptions.GalaxyWidth);
+            foreach(var capital in capitals) { Console.WriteLine(capital); }
             for (int i = 0; i < stars.Length; i++)
             {
                 if (!capitals.Contains(i))
@@ -128,8 +129,10 @@ namespace BrowserGameBackend.Services.Game
                     StarSystemId = stars[capitals[i]].Id,
                     StarSystem = stars[capitals[i]]
                 };
+                stars[capitals[i]].Capital = true;
                 stars[capitals[i]].Planets.Add(planet);
                 stars[capitals[i]].Faction = factions.FromKey(i);
+                Console.WriteLine(stars[capitals[i]].Faction + stars[capitals[i]].LocationX + " " + stars[capitals[i]].LocationY);
                 planets.Add(planet);
             }
             
@@ -265,6 +268,7 @@ namespace BrowserGameBackend.Services.Game
                                 {
                                     planets[current].BotId = bots[currentBotPos].Id;
                                     planets[current].Bot = bots[currentBotPos];
+                                    planets[current].Owned = true;
                                     bots[currentBotPos].Planets.Add(planets[current].Id);
                                     bots[currentBotPos].AvailableResources +=
                                                             planets[current].RareMetals + planets[current].Metals

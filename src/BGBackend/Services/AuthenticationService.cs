@@ -1,8 +1,12 @@
 ﻿using BrowserGameBackend.Data;
 using BrowserGameBackend.Tools;
 using BrowserGameBackend.Models;
+using BrowserGameBackend.Dto;
+
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions.Generated;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Identity;
 
 namespace BrowserGameBackend.Services
 {
@@ -11,7 +15,10 @@ namespace BrowserGameBackend.Services
     {
         public Task<bool> UsernameValidAndOriginal(string username);
         public Task<bool> EmailValidAndOriginal(string email);
-        public Task<string> Login(string email, string password);
+        public Task<string> CheckLoginCredentials(string email, string password);
+        public Task<bool> SessionIsValid(string session);
+
+        public bool AdminCheck(string password);
 
     }
     /// <summary>
@@ -20,13 +27,26 @@ namespace BrowserGameBackend.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly GameContext _context;
-        public AuthenticationService(GameContext context) 
+        private readonly IMemoryCache _memoryCache;
+        public AuthenticationService(GameContext context, IMemoryCache memoryCache) 
         {
             _context = context;
+            _memoryCache = memoryCache;
+        }
+
+        public async Task<bool> SessionIsValid(string session)
+        {
+            if (session != null && _memoryCache.Get(session) == null)
+            {
+                return await _context.Users.Where(user => user.SessionId == session)
+                                            .AnyAsync();
+            }
+            else return true;
         }
 
         public async Task<bool> UsernameValidAndOriginal(string username)
         {
+            Console.WriteLine(username);
             return UserInputTools.ValidUsername(username) &&
                     !await _context.Users.Where(usr => usr.Name == username)
                                          .AnyAsync();
@@ -39,7 +59,7 @@ namespace BrowserGameBackend.Services
                                          .AnyAsync();
         }
 
-        public async Task<string> Login(string email, string password)
+        public async Task<string> CheckLoginCredentials(string email, string password)
         {
             if (!UserInputTools.ValidEmail(email) || !UserInputTools.ValidPassword(password))
             {
@@ -57,5 +77,10 @@ namespace BrowserGameBackend.Services
             else return "Wrong email";
         }
 
+        public bool AdminCheck(string password)
+        {
+            //high security
+            return password == "123";
+        }
     }
 }

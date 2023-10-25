@@ -37,23 +37,6 @@ namespace BrowserGameBackend.Services.Game
 
         public async Task<StarSystemDto>? GetStarSystem(int starId)
         {
-            /*StarSystemDto? starSystemDto = 
-                await _context.StarSystems.Where(star => star.Id == starId)
-                                        .GroupJoin(
-                                            _context.Planets,
-                                            star => star,
-                                            planet => planet.StarSystem,
-                                            (star, planets) => new StarSystemDto
-                                            (
-                                            starId,
-                                            star.Name!,
-                                            star.LocationX,
-                                            star.LocationY,
-                                            star.Size,
-                                            star.TotalResources,
-                                            star.Faction,
-                                            planets))
-                                        .FirstOrDefaultAsync();*/
         StarSystemDto? starSystemDto =
             await _context.StarSystems.Where(star => star.Id == starId)
                                     .Select(

@@ -19,7 +19,5 @@ namespace BrowserGameBackend.Models
         public UserSkills UserSkills { get; set; } = null!;
         public ICollection<Planet> Planets { get; set; } = new List<Planet>();
         public ICollection<Fleet> Fleets { get; set; } = new List<Fleet>();
-
-
     }
 }

@@ -24,11 +24,11 @@ namespace BrowserGameBackend.Tools.GameTools
             int[] locations = new int[6] //6 factions, ordered as the Factions enum, move it to factions enum
             {
                 (int)(0.5 * galaxyWidth + 0 * galaxyWidth * galaxyWidth),   //robots - X 50%:Y 0%
-                (int)(0.9 * galaxyWidth + 0.3 * galaxyWidth * galaxyWidth), //vega- X 90%:Y 30%
-                (int)(0.9 * galaxyWidth + 0.7 * galaxyWidth * galaxyWidth), //parasites- X 90%:Y 70%
+                (int)(0.8 * galaxyWidth + 0.3 * galaxyWidth * galaxyWidth), //vega- X 80%:Y 30%
+                (int)(0.8 * galaxyWidth + 0.7 * galaxyWidth * galaxyWidth), //parasites- X 80%:Y 70%
                 (int)(0.5 * galaxyWidth + 0.9 * galaxyWidth * galaxyWidth), //solar - X 50%:Y 90%
-                (int)(0 * galaxyWidth + 0.7 * galaxyWidth * galaxyWidth),   //anarchists - X 0%:Y 70%
-                (int)(0 * galaxyWidth + 0.4 * galaxyWidth * galaxyWidth),   //azure - X 0%:Y 30%
+                (int)(0.2 * galaxyWidth + 0.7 * galaxyWidth * galaxyWidth),   //anarchists - X 20%:Y 70%
+                (int)(0.2 * galaxyWidth + 0.4 * galaxyWidth * galaxyWidth),   //azure - X 20%:Y 30%
             };
             return locations;
         }

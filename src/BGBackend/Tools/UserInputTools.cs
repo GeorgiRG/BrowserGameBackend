@@ -56,18 +56,5 @@ namespace BrowserGameBackend.Tools
                 && emailParts[0].Length < 63
                 && emailParts[1].Length < 253);
         }
-
-        public static bool ValidFaction(string faction)
-        {
-           string[] validFactions = { "Vega", "Solar", "Azure", "Unaffiliated" };
-           return validFactions.Contains(faction);
-        }
-
-        public static bool ValidSpecies(string species)
-        {
-            string[] validSpecies = { "Aquatics", "Humans", "Insects", "Liths", "Robots", "Parasites" };
-            return validSpecies.Contains(species);
-        }
-
     }
 }

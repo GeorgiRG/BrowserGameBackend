@@ -11,6 +11,5 @@
         public int Res2Req { get; set; } = 0;
         public int RequiredResource3Id { get; set; }
         public int Res3Req { get; set; } = 0;
-
     }
 }

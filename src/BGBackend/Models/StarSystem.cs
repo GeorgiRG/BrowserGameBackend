@@ -15,6 +15,7 @@ namespace BrowserGameBackend.Models
         public int TotalResources { get; set; }
         public string Faction { get; set; } = string.Empty;
         public bool Relay { get; set; } = false;
+        public bool Capital { get; set; } = false;
         public ICollection<Planet> Planets { get; } = new List<Planet>();
     }
 }

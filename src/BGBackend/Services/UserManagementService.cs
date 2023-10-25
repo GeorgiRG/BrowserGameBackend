@@ -15,6 +15,7 @@ using System.Text;
 using System.Runtime.Intrinsics.Arm;
 using System.Reflection.PortableExecutable;
 using BrowserGameBackend.Tools.GameTools;
+using BrowserGameBackend.Enums;
 
 namespace BrowserGameBackend.Services
 {
@@ -23,9 +24,9 @@ namespace BrowserGameBackend.Services
         public string CreateSessionId(string username);
         public Task<UserDto>? GetUserDto(string? sessionId = null, string? email = null);
         public Task<UserDto>? LoginUser(bool rememberMe, string? email = null, string? sessionId = null);
-        public Task<UserDto>? UpdateUser(string sessionId, string? email = null, string? faction = null, string? species = null, string? password = null);
+        public Task<UserDto>? CharacterCreation(string sessionId, string faction, string species);
         public Task<UserSkills>? GetUserSkills(UserDto userDto);
-        public Task<UserSkills>? UpdateUserSkills(UserDto userDto, UserSkills userSkills);
+        public Task<UserSkills>? UpdateUserSkills(string sessionId, LevelUpSkillsDto userSkills);
 
     }
     public class UserManagementService : IUserManagementService
@@ -34,7 +35,6 @@ namespace BrowserGameBackend.Services
         private readonly IMemoryCache _memoryCache;
         private readonly GameContext _context;
         private readonly Services.IAuthenticationService _authenticationService;
-
         private readonly MemoryCacheEntryOptions _userOptions = new MemoryCacheEntryOptions()
                                                                    .SetPriority(CacheItemPriority.Low)
                                                                    .SetSize(1)
@@ -81,13 +81,13 @@ namespace BrowserGameBackend.Services
             return userDto!;
         }
 
-        //still refreshes the sessionId even if 'remember me' is picked
         public async Task<UserDto>? LoginUser(bool rememberMe, string? email = null, string? sessionId = null)
         {
             UserDto? userDto = await GetUserDto(sessionId, email)!;
             if (userDto != null)
             {
                 string newSessionId = CreateSessionId(userDto.Name);
+                //still refreshes the sessionId even if 'remember me' is picked
                 userDto.SessionId = newSessionId;
                 _memoryCache.Set(newSessionId, userDto, _userOptions);
                 if (rememberMe)
@@ -100,34 +100,27 @@ namespace BrowserGameBackend.Services
             return null!;
         }
         
-        public async Task<UserDto>? UpdateUser(string sessionId, string? email = null, string? faction = null, string? species = null, string? password = null)
+        public async Task<UserDto>? CharacterCreation(string sessionId, string faction, string speciesData)
         {
             UserDto? userDto = await GetUserDto(sessionId: sessionId)!;
             if (userDto == null) return null!;
+
+            Factions factions = new();
+            SpeciesEnum species = new();
             
-            if (await _authenticationService.EmailValidAndOriginal(email!))
-            {
-                await _context.Users.Where(user => user.Id == userDto.Id )
-                                    .ExecuteUpdateAsync(user => user.SetProperty(user => user.Email, email));
-            }
-            if (UserInputTools.ValidFaction(faction!))
+            if (factions.IsValidValue(faction!))
             {
                 userDto.Faction = faction!;
                 await _context.Users.Where(user => user.Id == userDto.Id)
                                     .ExecuteUpdateAsync(user => user.SetProperty(user => user.Faction, faction));
             }
-            if (UserInputTools.ValidSpecies(species!))
+            if (species.IsValidValue(speciesData))
             {
-                userDto.Species = species!;
+                userDto.Species = speciesData!;
                 await _context.Users.Where(user => user.Id == userDto.Id)
-                                    .ExecuteUpdateAsync(user => user.SetProperty(user => user.Species, species));
+                                    .ExecuteUpdateAsync(user => user.SetProperty(user => user.Species, speciesData));
             }
-            if (password != null)
-            {
-                //not done
-                await _context.Users.Where(user => user.Id == userDto.Id)
-                                    .ExecuteUpdateAsync(user => user.SetProperty(user => user.Password, password));
-            }
+            
             _memoryCache.Set(sessionId, userDto, _userOptions);
             return userDto;
         }
@@ -137,8 +130,9 @@ namespace BrowserGameBackend.Services
                                                               .FirstOrDefaultAsync();
             return userSkills;
         }
-        public async Task<UserSkills>? UpdateUserSkills(UserDto userDto, UserSkills userSkills)
+        public async Task<UserSkills>? UpdateUserSkills(string sessionId, LevelUpSkillsDto userSkills)
         {
+            UserDto? userDto = await GetUserDto(sessionId: sessionId)!;
             UserSkills oldUserSkills = await GetUserSkills(userDto)!;
             if (oldUserSkills == null) return null!;
             oldUserSkills = CharacterTools.LevelUp(oldUserSkills, userSkills)!;
@@ -146,7 +140,6 @@ namespace BrowserGameBackend.Services
 
             await _context.SaveChangesAsync();
             return oldUserSkills;
-             
         }
     }
 }
